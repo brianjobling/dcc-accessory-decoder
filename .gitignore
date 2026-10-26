@@ -1,0 +1,8 @@
+# Arduino / arduino-cli build output
+build/
+*.hex
+*.elf
+*.bin
+
+# macOS
+.DS_Store
