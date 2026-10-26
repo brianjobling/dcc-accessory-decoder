@@ -1,33 +1,9 @@
 # dcc-accessory-decoder
+ESP8266 and ATtiny85 DCC decoders that light a red/white bi-colour LED as directional head/tail lights for a model locomotive — white forward, red reverse, F0/F1 control, with instant-on EEPROM state restore.
 
-DCC (Digital Command Control) decoders that light a red/white bi-colour LED as
-directional head/tail lights for a model locomotive (an HST Hornby dummy car) —
-white forward, red reverse, F0/F1 control, with instant-on EEPROM state restore.
+## Sketches
 
-Two implementations share the same behaviour:
+- `esp8266_dcc_lights/` – Wemos D1 mini + DRV8833 H-bridge.
+- `attiny85_dcc_lights/` – bare ATtiny85 (8 MHz internal), LED driven directly from PB0/PB1 via one series resistor (150–330 Ω). Program with Arduino-as-ISP using ATTinyCore (8 MHz internal). The sketch forces the clock prescaler to ÷1 and uses a pin-change interrupt plus software PWM so Timer0/`micros()` stay intact.
 
-| Project | Target | LED drive |
-|---|---|---|
-| [**DCCDecoderATtiny85**](DCCDecoderATtiny85/) | bare ATtiny85 (DIP-8, 8 MHz) | two GPIO pins direct |
-| [**DCCDecoderD1Mini**](DCCDecoderD1Mini/) | Wemos D1 mini (ESP8266) | DRV8833 H-bridge |
-
-## Behaviour
-
-Watch a single DCC loco address and drive the LED from its F0/F1/direction:
-
-| Throttle state | LED |
-|---|---|
-| F0 on, forward | white |
-| F0 on, reverse | red |
-| F0 (+ F1) on   | same colour, dimmed |
-| F0 off         | off |
-
-- **Instant-on:** the LED is driven first thing at power-up, restoring the last
-  F0/F1/direction from EEPROM, so a momentary track dropout barely blinks it.
-- The watched address is programmable over the rails (CV1 write on a programming
-  track; the D1 mini also supports accessory-999 learn mode and serial entry).
-
-Feed the DCC signal through an optocoupler isolation front-end — **never connect
-direct to the track.**
-
-See each subproject's README for wiring, build and flashing details.
+Both watch one loco address (default 10; changed by a CV1 write on a programming track) and decode F0/F1/direction: F0 + forward = white, F0 + reverse = red, F1 dims, F0 off = off. State is restored from EEPROM at power-up (default red/reverse). Always feed the DCC input through an optocoupler. Set `DEBUG_SERIAL 1` for TX-only debug (edges/s, packets, loco activity).
